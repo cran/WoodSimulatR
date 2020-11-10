@@ -1,0 +1,484 @@
+---
+title: "Basics of simulating sawn timber strength with WoodSimulatR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Basics of simulating sawn timber strength with WoodSimulatR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 5
+)
+```
+
+```{r setup}
+library(WoodSimulatR)
+library(magrittr)
+library(ggplot2)
+pander::panderOptions('knitr.auto.asis', FALSE);
+```
+
+# Introduction
+
+The `WoodSimulatR` package provides functions for generating artificial datasets of
+sawn wood properties obtained by destructive and non-destructive testing.
+
+An existing dataset containing some of these properties can be enriched by adding
+simulated values for the missing properties.
+
+## Aim of this document
+
+This document aims to provide an overview of the capabilities
+of the `WoodSimulatR` package.
+
+On the one hand, we will simulate a dataset with varying parameters,
+highlighting both the capabilities of the `WoodSimulatR` functions and the
+direction where it should go.
+
+On the other hand, we will illustrate the capabilities of `WoodSimulatR` with
+respect to simulating grade determining properties for a dataset with different
+pre-existing variables.
+
+# Simulate a whole dataset
+
+## Preliminaries
+
+As a quick summary of each dataset, we will show mean and CoV for all variables,
+split by country and subsample, and we will show the matrix of correlations.
+
+For this, we define the following function:
+
+```{r}
+summ_fun <- function(ds) {
+  grp <- c('country', 'subsample', 'loadtype');
+  grp <- intersect(grp, names(ds));
+  v <- setdiff(names(ds), grp);
+  
+  r <- cor(ds[v]);
+
+  ds <- tibble::add_column(ds, n = 1);
+  v <- c('n', v);
+  ds <- tidyr::gather(ds, 'property', 'value', !!! rlang::syms(v));
+  ds <- dplyr::mutate(
+    ds,
+    property = factor(
+      property,
+      levels=v,
+      labels=ifelse(v=='n', v, paste0(v, '_mean')),
+      ordered = TRUE
+    )
+  );
+  
+  grp <- c(grp, 'property');
+  ds <- dplyr::group_by(ds, !!! rlang::syms(grp));
+  
+  summ <- dplyr::summarise(
+    ds,
+    res = if (property[1] == 'n') sprintf('%.0f', sum(value)) else
+      sprintf(
+      if(property[1] %in% c('f_mean', 'ip_f_mean')) '%.1f (%.0f)' else '%.0f (%.0f)',
+      mean(value), 100*sd(value)/mean(value)),
+    .groups = 'drop_last'
+  );
+  pander::pander(
+    tidyr::spread(summ, property, res),
+    split.tables = Inf
+  );
+  
+  pander::pander(r)
+  
+  invisible(summ);
+}
+
+compare_with_def <- function(ds, ssd, target = c('mean', 'cov')) {
+  target <- match.arg(target);
+  
+  ds <- dplyr::group_by(ds, country);
+  summ <- dplyr::summarise(
+    ds,
+    f_mean.ach = mean(f),
+    f_cov.ach = sd(f) / f_mean.ach,
+    E_mean.ach = mean(E),
+    E_cov.ach = sd(E) / E_mean.ach,
+    rho_mean.ach = mean(rho),
+    rho_cov.ach = sd(rho) / rho_mean.ach,
+    .groups = 'drop_last'
+  );
+  
+  stopifnot(!anyDuplicated(ssd$country));
+  summ <- dplyr::left_join(
+    summ,
+    dplyr::select(
+      dplyr::mutate(ssd, f_cov = f_sd / f_mean, E_cov = E_sd / E_mean, rho_cov = rho_sd / rho_mean), 
+      country, f_mean, f_cov, E_mean, E_cov, rho_mean, rho_cov
+    ),
+    by = 'country'
+  );
+  
+  summ <- tidyr::pivot_longer(
+    summ,
+    -country,
+    names_to = c('gdpname', '.value'),
+    names_sep = '_'
+  );
+  summ <- dplyr::mutate(
+    summ,
+    gdpname = factor(gdpname, levels = c('f', 'E', 'rho'), ordered = TRUE)
+  );
+
+  if (target == 'mean') {
+    ggplot(data = summ, aes(mean.ach, mean)) +
+      geom_abline(slope = 1, intercept = 0) +
+      geom_text(aes(label = country)) +
+      geom_point(alpha = 0.5) +
+      facet_wrap(vars(gdpname), scales = 'free') +
+      theme(axis.text.x = element_text(angle = 90));
+  } else {
+    ggplot(data = summ, aes(cov.ach, cov)) +
+      geom_abline(slope = 1, intercept = 0) +
+      geom_text(aes(label = country)) +
+      geom_point(alpha = 0.5) +
+      facet_wrap(vars(gdpname), scales = 'free') +
+      theme(axis.text.x = element_text(angle = 90));
+  }
+}
+```
+
+
+## Default dataset
+
+The main function for dataset simulation is `simulate_dataset()`.
+It can be called without any further arguments to yield a "default" dataset.
+
+For reproducibility, we will call it with the extra argument 
+`random_seed = 12345`. This means that we will always generate the same
+random numbers.
+
+```{r results='asis'}
+dataset_0 <- simulate_dataset(random_seed = 2345);
+
+summ_fun(dataset_0);
+```
+
+The meaning of the properties in `dataset_0` is as follows:
+
+ *  **f**: strength of the sawn timber in N/mm² as obtained by destructive testing
+    (tensile strength or bending strength)
+ *  **E**: Modulus of elasticity in N/mm² as obtained by destructive testing in
+    tension or in bending
+ *  **rho** (as from the Greek symbol $\rho$): density of a small clear sample
+    cut from the sawn timber, in kg/m³
+ *  **E_dyn_u**: dynamic modulus of the green sawn timber in N/mm²
+ *  **ip_f**: an "indicating property" (IP) for the strength **f** in N/mm²,
+    obtained non-destructively as a function of **E_dyn**, **ip_rho** and the
+    total knot area ratio (tKAR) of a knot cluster of length 150mm (**knot_tc**
+    -- not included in the dataset).
+    - IP for tension strength:
+      $ip_f = 11.98 + 0.003913 E_{dyn} - 0.04822 ip_\rho - 34.72 * knot_{tc}$
+    - IP for bending strength:
+      $ip_f = 21.67 + 0.004302 E_{dyn} - 0.05366 * ip_\rho - 38.43 knot_{tc}$
+ *  **E_dyn**: dynamic modulus of the dry sawn timber in N/mm²
+ *  **ip_rho**: density of the whole board in kg/m³, calculated by weighing the
+    board and dividing the weight by the product of the measured dimensions.
+    
+All properties except **E_dyn_u** are to be taken as measured on the dry timber
+and corrected to a moisture content of 12%.
+ 
+## Customising options
+
+The default dataset created above relies on the following assumptions:
+
+ -  It's a dataset for *tensile strength* of spruce (*Picea abies*).
+ -  The correlations are taken from the "full" sample of Holzforschung Austria's
+    research project SiOSiP
+    ("SImulation-based Optimisation of Sawn tImber Production", 2014-2017)
+    on Austrian spruce wood.  <!-- add the piece counts? -->
+ -  After log-transforming $f$, for all variables a normal distribution is
+    assumed.
+ -  We create data for 5000 boards, split equally between four subsamples.
+ -  The means and standard deviations of $f$, $E$ and $rho$ are based on random
+    values chosen from the range of available reference values.
+ -  The reference values for mean and standard deviation of transformed
+    variables ($f$ in our case) are currently enforced exactly instead of
+    statistically -- this has to be improved yet.
+    
+All of these assumptions can be modified more or less freely.
+
+## Available subsample definitions (tension)
+
+```{r results='asis'}
+get_subsample_definitions(loadtype = 't') %>% 
+  dplyr::select(-species, -loadtype) %>%
+  dplyr::arrange(country) %>%
+  pander::pander(split.table = Inf);
+```
+
+## Available subsample definitions (bending)
+
+```{r results='asis'}
+get_subsample_definitions(loadtype = 'be') %>% 
+  dplyr::select(-species, -loadtype) %>%
+  dplyr::arrange(country) %>%
+  pander::pander(split.table = Inf);
+```
+
+## Simulated dataset with data from specific countries
+
+```{r results='asis'}
+ssd_c <- get_subsample_definitions(
+  country = c('at', 'de', 'fi', 'pl', 'se', 'si', 'sk'),
+  loadtype = 't'
+);
+
+dataset_c <- simulate_dataset(
+  random_seed = 12345,
+  n = 5000,
+  subsets = ssd_c
+);
+
+summ_fun(dataset_c);
+```
+
+Compare achieved means with the defined values. It can be seen that the means
+of $f$ are met exactly, while the means of $E$ and $rho$ are only met
+approximately, which is the desideratum when we are dealing with simulation.
+
+```{r}
+compare_with_def(dataset_c, ssd_c, 'm')
+```
+
+Compare achieved coefficients of variation with the defined values. Again, we
+have undesirable exact values for $f$.
+
+```{r}
+compare_with_def(dataset_c, ssd_c, 'cov')
+```
+
+## Different subsample sizes
+
+```{r results='asis'}
+ssd_cn <- get_subsample_definitions(
+  country = c(at = 1, de = 3, fi = 1.5, pl = 2, se = 3, si = 1, sk = 1),
+  loadtype = 't'
+);
+
+dataset_cn <- simulate_dataset(
+  random_seed = 12345,
+  n = 5000,
+  subsets = ssd_cn
+);
+
+summ_fun(dataset_cn);
+```
+
+## Further available options
+
+ -  bending strength simulation
+ -  without log-transform
+ -  from own data using `simbase_covar()`
+
+
+# Add simulated values to a dataset
+
+For adding simulated values to a dataset, we first need to establish the
+relationship between these values and some variables in the dataset.
+
+In `WoodSimulatR`, relationships are established in the following way:
+
+  1. We determine the covariance matrix and the means of a set of variables,
+    based on some kind of learning dataset.
+    This is done using the function `simbase_covar()`;
+    the resulting *simbase* has class "simbase_covar".
+  2. We also have the option to establish different relationships for different
+    subsets of the data, e.g. for different countries of origin.
+    This is done by grouping the dataset accordingly before calling
+    `simbase_covar()`;
+    the resulting *simbase* has class "simbase_list".
+    
+For both these options, it is possible to transform the involved variables.
+
+To visualise the result of the simulation, we use scatterplots and define them
+in the following function:
+
+```{r}
+plot_sim_gdp <- function(ds, simb, simulated_vars, ...) {
+  extra_aes <- rlang::enexprs(...);
+  ds <- dplyr::rename(ds, f_ref = f, E_ref = E, rho_ref = rho);
+  if (!any(simulated_vars %in% names(ds))) ds <- simulate_conditionally(data = ds, simbase = simb);
+  ds <- tidyr::pivot_longer(
+    data = ds,
+    cols = tidyselect::any_of(c('f_ref', 'E_ref', 'rho_ref', simulated_vars)),
+    names_to = c('name', '.value'),
+    names_sep = '_'
+  );
+  ds <- dplyr::mutate(
+    ds,
+    name = factor(name, levels = c('f', 'E', 'rho'), ordered = TRUE)
+  );
+  simname <- names(ds);
+  simname <- simname[dplyr::cumany(simname == 'name')];
+  simname <- setdiff(simname, c('name', 'ref'));
+  stopifnot(length(simname) == 1);
+  ggplot(data = ds, mapping = aes(.data[[simname]], ref, !!!extra_aes)) +
+    geom_point(alpha = .2, shape = 20) +
+    geom_abline(slope = 1, intercept = 0, alpha = .5, linetype = 'twodash') +
+    facet_wrap(vars(name), scales = 'free') +
+    theme(axis.text.x = element_text(angle = 90));
+} # undebug(plot_sim_gdp)
+```
+
+## `simbase_covar` without transformation
+
+The main approach in `WoodSimulatR` is to conditionally simulate
+based on the means and the covariance matrix.
+As a start, we create basis data
+for the simulation without applying any transformation.
+
+As we later want to add simulated GDP values to a dataset which already
+contains GDP values, we rename the GDP values for the `simbase_covar` to some
+other names not yet present in the target dataset, by suffixing with `_siml`
+(for SIMulation with Linear relationships)
+
+```{r}
+sb_untransf <- dataset_0 %>%
+  dplyr::rename(f_siml = f, E_siml = E, rho_siml = rho) %>%
+  simbase_covar(
+    variables = c('f_siml', 'E_siml', 'rho_siml', 'ip_f', 'E_dyn', 'ip_rho')
+  );
+
+sb_untransf;
+```
+
+Adding the simulated GDP values to a dataset is done by calling
+`simulate_conditionally()`.
+
+```{r results='asis'}
+dataset_c_sim <- simulate_conditionally(dataset_c, sb_untransf);
+names(dataset_c_sim) %>% pander::pander();
+```
+
+For a visual comparison:
+
+```{r}
+plot_sim_gdp(dataset_c_sim, sb_untransf, c('f_siml', 'E_siml', 'rho_siml'));
+```
+
+This looks good for $E$ and $\rho$, but wrong in the $f$ simulation.
+
+## `simbase_covar` with log-transformed $f$
+
+We might try using `transforms` to improve the result. For this, we have to pass
+a list with named entries corresponding to the GDP we want to transform.
+
+The entry itself must be an object of class `"trans"`
+(from the package `scales`).
+As we want to use a log-transform, the required entry is `scales::log_trans()`.
+
+```{r}
+sb_transf <- dataset_0 %>%
+  dplyr::rename(f_simt = f, E_simt = E, rho_simt = rho) %>%
+  simbase_covar(
+    variables = c('f_simt', 'E_simt', 'rho_simt', 'ip_f', 'E_dyn', 'ip_rho'),
+    transforms = list(f_simt = scales::log_trans())
+  );
+dataset_c_sim <- simulate_conditionally(dataset_c_sim, sb_transf);
+plot_sim_gdp(dataset_c_sim, sb_transf, c('f_simt', 'E_simt', 'rho_simt'));
+```
+
+Now, this looks much better (which is no surprise, as `dataset_c` itself has
+been simulated with lognormal $f$).
+
+## `simbase_covar` with log-transformed $f$ and derived on a grouped dataset
+
+If we group the reference dataset (`dataset_0`), e.g. by country, we get an
+object of class "simbase_list" with separate simbases for each group
+(technically, this is a `tibble` with the grouping variables and an extra
+column `.simbase` which contains several objects of class "simbase_covar").
+
+```{r}
+sb_group <- dataset_0 %>%
+  dplyr::group_by(country) %>%
+  dplyr::rename(f_simg = f, E_simg = E, rho_simg = rho) %>%
+  simbase_covar(
+    variables = c('f_simg', 'E_simg', 'rho_simg', 'ip_f', 'E_dyn', 'ip_rho'),
+    transforms = list(f_simg = scales::log_trans())
+  );
+
+sb_group
+```
+
+If we add variables to a dataset using such a "simbase_list", it is required
+that all grouping variables stored in the "simbase_list" object are also
+available in this dataset.
+
+In our case: the dataset must contain the variable "country". Values of
+"country" which do not also exist in our "simbase" object will result in
+`NA` values for the variables to be simulated.
+
+Therefore, we add the variables in this case not to the dataset `dataset_c`
+(which has different values for "country") but to the `dataset_0` itself.
+
+```{r}
+dataset_0_sim <- simulate_conditionally(dataset_0, sb_group);
+plot_sim_gdp(dataset_0_sim, sb_group, c('f_simg', 'E_simg', 'rho_simg'), colour=country);
+```
+
+
+# Simulate a whole dataset, based on a `simbase_list` object
+
+Simbase objects of class "simbase_list" can also be used for simulating an
+entire dataset, as long as the "simbase_list" only has the grouping variable(s)
+"country" and/or "subsample", and as long as the value combinations in
+"country"/"subsample" match those given in the "subsets" argument to the
+function `simulate_dataset`.
+
+To demonstrate, we calculate a "simbase_list" based on the `dataset_c` created
+above. Here, we *do not rename* any of the variables.
+
+```{r}
+sb_group_c <- dataset_c %>%
+  dplyr::group_by(country) %>%
+  simbase_covar(
+    variables = c('f', 'E', 'rho', 'ip_f', 'E_dyn', 'ip_rho'),
+    transforms = list(f = scales::log_trans())
+  );
+
+sb_group_c
+```
+
+This "simbase_list" is now used as input to `simulate_dataset` with the subset
+definitions used previously (`ssd_cn`).
+
+```{r results='asis'}
+dataset_cn2 <- simulate_dataset(
+  random_seed = 12345,
+  n = 5000,
+  subsets = ssd_cn,
+  simbase = sb_group_c
+);
+
+summ_fun(dataset_cn2);
+```
+
+
+# Conclusions
+
+The package `WoodSimulatR` has functions for simulating entire datasets of sawn
+timber properties, both
+based on internal definitions and on externally supplied base data.
+
+`WoodSimulatR` also has functions for adding
+simulated grade determining properties (or other properties)
+to a given dataset, based on a covariance matrix approach.
+
+The functions for adding simulated variables are suitable for all kinds of
+datasets, if one calculates an appropriate `simbase_covar` object oneself, by a
+call to `simbase_covar` using reference data.
+
+The simulation methods also support variable transformations to accommodate
+non-normally distributed variables.
+
