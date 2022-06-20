@@ -11,7 +11,7 @@ get_transform_names(
 }
 \arguments{
 \item{transforms}{A named list of objects of class \code{trans}
-(see \code{\link{trans_new}})}
+(see function \code{trans_new} in package \code{scales})}
 
 \item{prefer_primitive}{If "never", the function always returns the value of
 the field \code{name} (except if this is missing).

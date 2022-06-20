@@ -23,7 +23,7 @@ which should be included in the simulation. If missing, all numeric
 variables in \code{data} are used.}
 
 \item{transforms}{A named list of objects of class \code{trans}
-(see \code{\link{trans_new}});
+(see function \code{trans_new} in package \code{scales});
 the name of each list entry
 \bold{must} correspond to a variable name in \code{variables}.}
 
@@ -55,7 +55,7 @@ variable in the data which is to be transformed.
 
 Predefined transforms can be found in the package \code{scales}, where they are
 used for axis transformations as a preparation for plotting. The package
-\code{scales} also contains a function \code{\link{trans_new}} which can be used
+\code{scales} also contains a function \code{trans_new} which can be used
 to define new transforms.
 
 In the context of destructively measured sawn timber properties, the type of

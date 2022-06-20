@@ -93,7 +93,7 @@ simbase_list <- function(data, simbase_constructor, ..., suffix = '_lst') {
 #'
 #' Predefined transforms can be found in the package `scales`, where they are
 #' used for axis transformations as a preparation for plotting. The package
-#' `scales` also contains a function \code{\link{trans_new}} which can be used
+#' `scales` also contains a function \code{trans_new} which can be used
 #' to define new transforms.
 #'
 #' In the context of destructively measured sawn timber properties, the type of
@@ -118,7 +118,7 @@ simbase_list <- function(data, simbase_constructor, ..., suffix = '_lst') {
 #'   which should be included in the simulation. If missing, all numeric
 #'   variables in \code{data} are used.
 #' @param transforms A named list of objects of class \code{trans}
-#'   (see \code{\link{trans_new}});
+#'   (see function \code{trans_new} in package \code{scales});
 #'   the name of each list entry
 #'   \bold{must} correspond to a variable name in \code{variables}.
 #' @param label Either a string describing the data and the simulation approach,
@@ -256,7 +256,8 @@ simbase_covar <- function(data, variables = NULL, transforms=list(), label = sim
 #' @param simbase_class The class of the simbase object for which the label is
 #'    to be generated. Currently, only \code{"simbase_covar"} is supported.
 #' @param transforms The transforms applied to variables in the dataset. Must be
-#'  objects of class \code{trans} (see \code{\link{trans_new}}).
+#'  objects of class \code{trans} (see function \code{trans_new} in package
+#'  \code{scales}).
 #'
 #' @return A string for labelling a simbase object.
 #'
@@ -316,7 +317,7 @@ simbase_labeler <- function(data, simbase_class, transforms) {
 #' a generic function name \code{"f."} is returned.
 #'
 #' @param transforms A named list of objects of class \code{trans}
-#'  (see \code{\link{trans_new}})
+#'  (see function \code{trans_new} in package \code{scales})
 #' @param prefer_primitive If "never", the function always returns the value of
 #'  the field \code{name} (except if this is missing).
 #'  If "always", the name of the called function is returned unless it cannot be
@@ -604,7 +605,16 @@ simulate_conditionally.simbase_list <- function(data, simbase, force_positive=TR
 
   if (any(i > 0)) {
     dssym <- rlang::sym(dsname);
-    grpd <- dplyr::mutate(grpd, !! dssym := purrr::map2(!! dssym, .data$.simbase, simulate_conditionally));
+    grpd <- dplyr::mutate(
+      grpd,
+      !! dssym := purrr::map2(
+        .x = !! dssym,
+        .y = .data$.simbase,
+        .f = simulate_conditionally,
+        force_positive = force_positive,
+        ...
+      )
+    );
     grpd <- tidyr::unnest(dplyr::select(grpd, -.data$.simbase), cols = dsname);
     grpd <- dplyr::bind_rows(grpd, grpd_0);
   } else {

@@ -199,7 +199,7 @@ get_subsample_definitions <- function(country=NULL, loadtype='t', species='PCAB'
     }
 
     # enforce unique subsample names, based on country names if the subsample
-    # exists in the stored dataset WoodGradeR:::gdp_data
+    # exists in the stored dataset WoodSimulatR:::gdp_data
     # If a certain subsample name would appear multiple times, indices are
     # appended with '_'. This differs from make.unique in that the first, not
     # the second appearance of the name gets changed to '*_1'.

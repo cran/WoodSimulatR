@@ -8,7 +8,7 @@
 <!-- badges: end -->
 
 The `WoodSimulatR` package has been developed in the project InnoGrading
-by Holzforschung Austria ().
+by Holzforschung Austria (<https://www.holzforschung.at>).
 
 It provides tools for generating simulated sawn timber strength grading
 data.

@@ -1,6 +1,7 @@
 ---
 title: "Basics of simulating sawn timber strength with WoodSimulatR"
 output: rmarkdown::html_vignette
+bibliography: Inno.bib
 vignette: >
   %\VignetteIndexEntry{Basics of simulating sawn timber strength with WoodSimulatR}
   %\VignetteEngine{knitr::rmarkdown}
@@ -53,8 +54,7 @@ split by country and subsample, and we will show the matrix of correlations.
 For this, we define the following function:
 
 ```{r}
-summ_fun <- function(ds) {
-  grp <- c('country', 'subsample', 'loadtype');
+summ_fun <- function(ds, grp = c('country', 'subsample', 'loadtype')) {
   grp <- intersect(grp, names(ds));
   v <- setdiff(names(ds), grp);
   
@@ -166,6 +166,13 @@ summ_fun(dataset_0);
 
 The meaning of the properties in `dataset_0` is as follows:
 
+ *  **country, subsample**: when analysing properties of sawn wood, the timber
+    typically are grouped by country of origin and possibly by further criteria
+    into subsamples for each country.
+    In a call without further specifications, `simulate_dataset()` returns
+    generic country names "C1", "C2" etc., and sets the subsample names equal to
+    the country names.
+    Further options for countries and subsamples are explained below.
  *  **f**: strength of the sawn timber in N/mm² as obtained by destructive testing
     (tensile strength or bending strength)
  *  **E**: Modulus of elasticity in N/mm² as obtained by destructive testing in
@@ -187,7 +194,7 @@ The meaning of the properties in `dataset_0` is as follows:
     
 All properties except **E_dyn_u** are to be taken as measured on the dry timber
 and corrected to a moisture content of 12%.
- 
+
 ## Customising options
 
 The default dataset created above relies on the following assumptions:
@@ -208,7 +215,17 @@ The default dataset created above relies on the following assumptions:
     
 All of these assumptions can be modified more or less freely.
 
-## Available subsample definitions (tension)
+## Available subsample definitions
+
+For convenience, the `WoodSimulatR` package contains tables with means and
+standard deviations for **f**, **E** and **rho** for different countries,
+obtained in the research projects SiOSiP and
+GradeWood [@Ranta_Maunus_et_al_2011_] or reported in scientific papers
+[@Stapel_et_al_2014_; @Rohanova_2014_].
+Data from both destructive tension and bending tests are available.
+Currently, the data is restricted to European spruce (*Picea abies*, PCAB).
+
+### Tensile tests
 
 ```{r results='asis'}
 get_subsample_definitions(loadtype = 't') %>% 
@@ -217,7 +234,7 @@ get_subsample_definitions(loadtype = 't') %>%
   pander::pander(split.table = Inf);
 ```
 
-## Available subsample definitions (bending)
+### Bending tests
 
 ```{r results='asis'}
 get_subsample_definitions(loadtype = 'be') %>% 
@@ -274,6 +291,38 @@ dataset_cn <- simulate_dataset(
 
 summ_fun(dataset_cn);
 ```
+
+## Own specification of means and standard deviations
+
+In a similar manner to the predefined country specifications, we can also define
+our own.
+Since Version 0.6.0, we can also used different sample identifier columns
+(instead of the standard "country" and "subsample")
+-- for details, check the help on `simulate_dataset()`.
+
+As an example, we define different properties for boards with different cross
+sections (width and thickness, given in mm).
+
+```{r}
+ssd_custom <- tibble::tribble(
+  ~width, ~thickness, ~f_mean, ~f_sd,
+      80,     40,      27.5,    9.0,
+     140,     40,      29.4,    9.7,
+     160,     60,      31.6,    9.3,
+     200,     50,      30.2,   11.4, 
+     240,     95,      25.5,    4.8,
+     250,     40,      25.3,   11.2
+);
+
+dataset_custom <- simulate_dataset(
+  random_seed = 12345,
+  n = 5000,
+  subsets = ssd_custom
+);
+
+summ_fun(dataset_custom, grp = c('width', 'thickness', 'loadtype'));
+``` 
+
 
 ## Further available options
 
@@ -482,3 +531,4 @@ call to `simbase_covar` using reference data.
 The simulation methods also support variable transformations to accommodate
 non-normally distributed variables.
 
+# References

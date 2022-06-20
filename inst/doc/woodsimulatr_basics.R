@@ -12,8 +12,7 @@ library(ggplot2)
 pander::panderOptions('knitr.auto.asis', FALSE);
 
 ## -----------------------------------------------------------------------------
-summ_fun <- function(ds) {
-  grp <- c('country', 'subsample', 'loadtype');
+summ_fun <- function(ds, grp = c('country', 'subsample', 'loadtype')) {
   grp <- intersect(grp, names(ds));
   v <- setdiff(names(ds), grp);
   
@@ -156,6 +155,25 @@ dataset_cn <- simulate_dataset(
 );
 
 summ_fun(dataset_cn);
+
+## -----------------------------------------------------------------------------
+ssd_custom <- tibble::tribble(
+  ~width, ~thickness, ~f_mean, ~f_sd,
+      80,     40,      27.5,    9.0,
+     140,     40,      29.4,    9.7,
+     160,     60,      31.6,    9.3,
+     200,     50,      30.2,   11.4, 
+     240,     95,      25.5,    4.8,
+     250,     40,      25.3,   11.2
+);
+
+dataset_custom <- simulate_dataset(
+  random_seed = 12345,
+  n = 5000,
+  subsets = ssd_custom
+);
+
+summ_fun(dataset_custom, grp = c('width', 'thickness', 'loadtype'));
 
 ## -----------------------------------------------------------------------------
 plot_sim_gdp <- function(ds, simb, simulated_vars, ...) {

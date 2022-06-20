@@ -10,7 +10,8 @@ simulate_dataset(
   random_seed = NULL,
   simbase = WoodSimulatR::ws_t_logf,
   loadtype = NULL,
-  ...
+  ...,
+  RNGversion = "3.6.0"
 )
 }
 \arguments{
@@ -36,13 +37,20 @@ contain a field \code{loadtype} or if the loadtype is ambiguous or not
 equal to "t" or "be".}
 
 \item{...}{arguments passed on to \code{\link{get_subsample_definitions}}.}
+
+\item{RNGversion}{In \code{WoodSimulatR 0.5}, the \code{RNGversion} had been
+fixed to \code{RNGversion = "3.5.0"}, but this setting now causes a warning
+because the random number generator was changed in R version 3.6.0
+(see \code{\link{RNGversion}}).
+For perfect reproducibility of results from \code{WoodSimulatR 0.5},
+one should set \code{RNGversion = "3.5.0"}.}
 }
 \description{
 Generate an artificial dataset with correlated variables and defined means
 and standard deviations.
 }
 \details{
-In the package WoodGradeR, a number of predefined base values for simulation
+In the package WoodSimulatR, a number of predefined base values for simulation
 are stored -- see \code{\link{simbase}}.
 
 Using a character vector for the argument \code{subsets} leads to subsets
@@ -57,28 +65,47 @@ means and standard deviations if \code{simbase} is an object of class
 \code{\link{simbase_list}}.
 \item If a numeric vector or a character vector, it is used as argument
 \code{country} in an internal call to \code{\link{get_subsample_definitions}}.
-\item If a dataset, it has to have columns \code{country} and
-\code{subsample}, the latter being unique per row.
-A column \code{share} can be used to create subsamples of different sizes
-proportional to the values in \code{share}.
-For a least one of the variables defined in the \code{simbase}, also the
-mean \emph{and} the standard deviation need to be given in each row; the
-column names for this data must be the name of the respective variable(s)
+\item If a dataset, there are the following requirements:
+\itemize{
+\item \emph{identifier columns}: The dataset has to have one or more
+discrete-valued \emph{identifier columns} (usually character vectors or
+factors) which uniquely identify each row.
+These \emph{identifier columns} are named \code{"country"} and
+\code{"subsample"} in the standard case as yielded by
+\code{\link{get_subsample_definitions}}.
+In the general case, the identifier columns are detected as those
+columns which are not named \code{share, species, loadtype} or
+\code{literature} and which do not end in \code{_mean} or \code{_sd}.
+If the argument \code{simbase} is of class \code{\link{simbase_list}},
+further restrictions apply (see below).
+\item \emph{means and standard deviations}: For at least one of the
+variables defined in the \code{simbase}, also the mean \emph{and} the
+standard deviation need to be given in each row; the column names for
+this data must be the name of the respective variable(s)
 from the \code{simbase}, suffixed by \code{_mean} and \code{_sd},
 respectively.
+\item \emph{optional}: A column \code{share} can be used to create
+subsamples of different sizes proportional to the values in
+\code{share}.
+}
 }
 
-The argument simbase can be either an object of class
+The argument \code{simbase} can be either an object of class
 \code{\link{simbase_covar}} or of class \code{\link{simbase_list}}.
 \itemize{
 \item various predefined \code{\link{simbase_covar}} objects are available
 in \code{WoodSimulatR} -- see \code{\link{simbase}}.
 \item for objects of class \code{\link{simbase_list}}, additional
-restrictions apply: the object may only have the grouping variable(s)
-"country" and/or "subsample", and the value combinations in
-"country"/"subsample" have to match those given in the \code{subsets}
-argument respectively in the subsample definitions this \code{subsets}
-argument leads to (see also \code{\link{get_subsample_definitions}}).
+restrictions apply:
+\enumerate{
+\item the object may only have grouping variable(s) which are also
+\emph{identifier columns} according to the \code{subsets} definition
+above -- if the \code{subsets} argument is \emph{not} a data frame,
+the \emph{identifier columns} are "country" and "subsample".
+\item The value combinations in the \emph{identifier columns} have to
+match those which the \code{subsets} argument leads to
+(see also \code{\link{get_subsample_definitions}}).
+}
 }
 
 Both the means and standard deviations in the subsample definitions
@@ -98,9 +125,25 @@ zero.
 If \code{random_seed} is not \code{NULL}, reproducibility of results
 is enforced by using \code{\link{set.seed}} with arguments
 \code{kind='Mersenne-Twister'} and \code{normal.kind='Inversion'},
-and by calling \code{\link{RNGversion}} with argument \code{'3.5.0'}.
+and by calling \code{\link{RNGversion}} with argument \code{RNGversion}.
 
 If \code{random_seed} is not \code{NULL}, the random number generator
 is reset at the end of the function using \code{set.seed(NULL)} and
 \code{RNGversion(toString(getRversion()))}.
+}
+\examples{
+simulate_dataset(n = 10, subsets = 1, random_seed = 1)
+
+# As the loadtype is defined in the simbase, the argument loadtype is ignored
+# with a warning
+simulate_dataset(n = 10, subsets = 1, random_seed = 1, loadtype = 'be')
+
+# Two subsamples
+simulate_dataset(n = 10, subsets = 2, random_seed = 1)
+
+# Two subsamples from pre-defined countries
+simulate_dataset(n = 10, subsets = c('at', 'de'), random_seed = 1)
+
+# Two subsamples from pre-defined countries with different sample sizes
+simulate_dataset(n = 10, subsets = c(at = 3, de = 2), random_seed = 1)
 }

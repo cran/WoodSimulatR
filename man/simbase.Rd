@@ -18,7 +18,8 @@
 \format{
 For statistical simulation of datasets in \code{WoodSimulatR}, one
 needs a \code{\link{simbase_covar}} object. \code{WoodSimulatR} contains a
-set of such predefined simbases.
+set of such predefined simbases for Norway spruce (\emph{Picea abies}) grown
+in Austria.
 
 The names of the simbases follow the following schema -- the different parts
 are separated by "_":
@@ -50,7 +51,7 @@ in N/mm².}
 measuring the weight of each board and dividing by its volume, in kg/m³.}
 \item{ip_f}{An "indicating property" (IP) for strength, established by
 linear regression on \code{E_dyn}, \code{ip_rho} and a knot parameter
-called "total knot area ratio" (tKAR).}
+called "total knot area ratio" (tKAR), in N/mm².}
 }
 }
 \source{
