@@ -178,7 +178,7 @@ simbase_covar <- function(data, variables = NULL, transforms=list(), label = sim
     # are the names of the list entries of transforms contained in variables?
     stopifnot(all(names(transforms) %in% variables))
     # are all list entries objects of class "trans"?
-    i <- purrr::map_lgl(transforms, ~ inherits(.x, 'trans') || inherits(.x, 'transform');
+    i <- purrr::map_lgl(transforms, ~ inherits(.x, 'trans') || inherits(.x, 'transform'));
     if (any(!i)) {
       stop('All transforms must be objects of class "trans" (see scales::trans)')
     }
