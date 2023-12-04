@@ -140,6 +140,8 @@
 simulate_dataset <- function(n=5000, subsets=4, random_seed=NULL,
                              simbase=WoodSimulatR::ws_t_logf, loadtype = NULL,
                              ..., RNGversion = '3.6.0') {
+  .simbase <- country <- subsample <- NULL; # due to NSE notes in R CMD check
+
   stopifnot(length(n) == 1);
   n <- round(n);     # force n to be an integer value # XXX give a warning if not integer?
   stopifnot(n > 0);
@@ -232,7 +234,7 @@ simulate_dataset <- function(n=5000, subsets=4, random_seed=NULL,
   # process the subsets argument
   if (subset_null) {
     if (inherits(simbase, 'simbase_list')) {
-      subsets <- dplyr::select(simbase, -.data$.simbase);
+      subsets <- dplyr::select(simbase, -.simbase);
       # ATTENTION: in the subsets_null case, the identifier_columns are
       # ALWAYS country and subsample!!!
       # TODO: add a test to pin this down?
@@ -240,9 +242,9 @@ simulate_dataset <- function(n=5000, subsets=4, random_seed=NULL,
       if (!any(j)) {
         stop('no grouping variables in the `simbase_list` object???');
       } else if (j[1] && !j[2]) {
-        subsets <- dplyr::mutate(subsets, subsample = make.unique(.data$country, sep = '_'));
+        subsets <- dplyr::mutate(subsets, subsample = make.unique(country, sep = '_'));
       } else if (!j[1] && j[2]) {
-        subsets <- dplyr::mutate(subsets, country = .data$subsample);
+        subsets <- dplyr::mutate(subsets, country = subsample);
       }
 
       subsets <- tibble::add_column(subsets, share = 1);
@@ -305,7 +307,7 @@ simulate_dataset <- function(n=5000, subsets=4, random_seed=NULL,
     j <- is.na(subsets$.simbase);
     if (any(j)) {
       warning('for some rows of `subsets`, no fitting row of the `simbase` was found! They are removed.');
-      subsets <- dplyr::filter(subsets, !is.na(.data$.simbase));
+      subsets <- dplyr::filter(subsets, !is.na(.simbase));
     }
 
   } else if (inherits(simbase, 'simbase_covar')) {

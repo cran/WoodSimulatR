@@ -38,6 +38,8 @@
 #'
 #' @export
 simbase_list <- function(data, simbase_constructor, ..., suffix = '_lst') {
+  .simbase <- NULL; # due to NSE notes in R CMD check
+
   stopifnot(dplyr::is_grouped_df(data));
   if ('.simbase' %in% dplyr::group_vars(data)) {
     stop('As ".simbase" is the column where the simbases are stored, there mustn\'t be a grouping variable of this name!');
@@ -49,7 +51,7 @@ simbase_list <- function(data, simbase_constructor, ..., suffix = '_lst') {
   simbase <- dplyr::mutate(
     simbase,
     .simbase = purrr::map(
-      .data$.simbase,
+      .simbase,
       simbase_constructor,
       ...
     )
@@ -65,7 +67,7 @@ simbase_list <- function(data, simbase_constructor, ..., suffix = '_lst') {
     simbase <- dplyr::mutate(
       simbase,
       .simbase = purrr::map(
-        .data$.simbase,
+        .simbase,
         function(sb) { sb$label <- paste0(sb$label, suffix); sb; }
       )
     )
@@ -118,6 +120,7 @@ simbase_list <- function(data, simbase_constructor, ..., suffix = '_lst') {
 #'   which should be included in the simulation. If missing, all numeric
 #'   variables in \code{data} are used.
 #' @param transforms A named list of objects of class \code{trans}
+#'   or class \code{transform}
 #'   (see function \code{trans_new} in package \code{scales});
 #'   the name of each list entry
 #'   \bold{must} correspond to a variable name in \code{variables}.
@@ -147,7 +150,7 @@ simbase_list <- function(data, simbase_constructor, ..., suffix = '_lst') {
 #' # calculate a simbase without transforms
 #' simbase_covar(dataset, c('f', 'E', 'rho', 'E_dyn'));
 #'
-#' # calcuate a simbase with log-transformed f
+#' # calculate a simbase with log-transformed f
 #' simbase_covar(dataset, c('f', 'E', 'rho', 'E_dyn'), list(f = scales::log_trans()));
 #'
 #' # if we group the dataset, we get a simbase_list object
@@ -177,10 +180,10 @@ simbase_covar <- function(data, variables = NULL, transforms=list(), label = sim
     stopifnot(!is.null(names(transforms)));
     # are the names of the list entries of transforms contained in variables?
     stopifnot(all(names(transforms) %in% variables))
-    # are all list entries objects of class "trans"?
-    i <- purrr::map_lgl(transforms, ~ inherits(.x, 'trans'));
+    # are all list entries objects of class "trans" or "transform"?
+    i <- purrr::map_lgl(transforms, ~ inherits(.x, c('trans', 'transform')));
     if (any(!i)) {
-      stop('All transforms must be objects of class "trans" (see scales::trans)')
+      stop('All transforms must be objects of class "trans" or class "transform" (see scales::trans)')
     }
   }
 
@@ -255,9 +258,9 @@ simbase_covar <- function(data, variables = NULL, transforms=list(), label = sim
 #' @param data The dataset for the calculation of the basic simulation data.
 #' @param simbase_class The class of the simbase object for which the label is
 #'    to be generated. Currently, only \code{"simbase_covar"} is supported.
-#' @param transforms The transforms applied to variables in the dataset. Must be
-#'  objects of class \code{trans} (see function \code{trans_new} in package
-#'  \code{scales}).
+#' @param transforms The transforms applied to variables in the dataset.
+#'  Must be objects of class \code{trans} or class \code{transform}
+#'  (see function \code{trans_new} in package \code{scales}).
 #'
 #' @return A string for labelling a simbase object.
 #'
@@ -301,10 +304,12 @@ simbase_labeler <- function(data, simbase_class, transforms) {
 #' done by \code{\link{simbase_labeler}}).
 #'
 #' The label of a transform could be the value of the field \code{name} from
-#' each object of class \code{trans}, but also the name of the transform
+#' each object of class \code{trans} (or \code{transform}),
+#' but also the name of the transform
 #' function itself, if it is a primitive function or just calls one function.
 #'
-#' Each object of class \code{trans} should have a field \code{name}
+#' Each object of class \code{trans} (or \code{transform})
+#' should have a field \code{name}
 #' which can be returned by the present function.
 #'
 #' The function examines the field \code{transform}.
@@ -317,6 +322,7 @@ simbase_labeler <- function(data, simbase_class, transforms) {
 #' a generic function name \code{"f."} is returned.
 #'
 #' @param transforms A named list of objects of class \code{trans}
+#'  or class \code{transform}
 #'  (see function \code{trans_new} in package \code{scales})
 #' @param prefer_primitive If "never", the function always returns the value of
 #'  the field \code{name} (except if this is missing).
@@ -567,6 +573,8 @@ simulate_conditionally.simbase_covar <- function(data, simbase, force_positive=T
 #' @importFrom tidyr unnest
 #' @export
 simulate_conditionally.simbase_list <- function(data, simbase, force_positive=TRUE, ..., error_when_groups_missing = TRUE) {
+  .simbase <- NULL; # due to NSE notes in R CMD check
+
   grpv <- setdiff(names(simbase), '.simbase');
   if (!all(grpv %in% names(data))) {
     stop('the following grouping variables from simbase are missing in data: ',
@@ -589,7 +597,7 @@ simulate_conditionally.simbase_list <- function(data, simbase, force_positive=TR
               ' in data are not found in simbase. This will lead to NA values!');
 
       # add the NA values where no simbase entry is available
-      grpd_0 <- tidyr::unnest(dplyr::select(grpd[i == 0, ], -.data$.simbase), cols = dsname);
+      grpd_0 <- tidyr::unnest(dplyr::select(grpd[i == 0, ], -.simbase), cols = dsname);
       n <- setdiff(variable.names(simbase), names(grpd_0));
       if (length(n) > 0) {
         n <- structure(rep(list(rlang::expr(NA)), length(n)), names = n);
@@ -609,13 +617,13 @@ simulate_conditionally.simbase_list <- function(data, simbase, force_positive=TR
       grpd,
       !! dssym := purrr::map2(
         .x = !! dssym,
-        .y = .data$.simbase,
+        .y = .simbase,
         .f = simulate_conditionally,
         force_positive = force_positive,
         ...
       )
     );
-    grpd <- tidyr::unnest(dplyr::select(grpd, -.data$.simbase), cols = dsname);
+    grpd <- tidyr::unnest(dplyr::select(grpd, -.simbase), cols = tidyselect::all_of(dsname));
     grpd <- dplyr::bind_rows(grpd, grpd_0);
   } else {
     grpd <- grpd_0;

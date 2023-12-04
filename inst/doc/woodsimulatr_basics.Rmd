@@ -424,7 +424,9 @@ We might try using `transforms` to improve the result. For this, we have to pass
 a list with named entries corresponding to the GDP we want to transform.
 
 The entry itself must be an object of class `"trans"`
-(from the package `scales`).
+(from the package `scales`, version < 1.3.0)
+or class `"transform"`
+(package `scales`, version $\ge$ 1.3.0).
 As we want to use a log-transform, the required entry is `scales::log_trans()`.
 
 ```{r}

@@ -12,9 +12,9 @@ simbase_labeler(data, simbase_class, transforms)
 \item{simbase_class}{The class of the simbase object for which the label is
 to be generated. Currently, only \code{"simbase_covar"} is supported.}
 
-\item{transforms}{The transforms applied to variables in the dataset. Must be
-objects of class \code{trans} (see function \code{trans_new} in package
-\code{scales}).}
+\item{transforms}{The transforms applied to variables in the dataset.
+Must be objects of class \code{trans} or class \code{transform}
+(see function \code{trans_new} in package \code{scales}).}
 }
 \value{
 A string for labelling a simbase object.

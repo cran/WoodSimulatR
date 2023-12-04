@@ -11,6 +11,7 @@ get_transform_names(
 }
 \arguments{
 \item{transforms}{A named list of objects of class \code{trans}
+or class \code{transform}
 (see function \code{trans_new} in package \code{scales})}
 
 \item{prefer_primitive}{If "never", the function always returns the value of
@@ -31,10 +32,12 @@ done by \code{\link{simbase_labeler}}).
 }
 \details{
 The label of a transform could be the value of the field \code{name} from
-each object of class \code{trans}, but also the name of the transform
+each object of class \code{trans} (or \code{transform}),
+but also the name of the transform
 function itself, if it is a primitive function or just calls one function.
 
-Each object of class \code{trans} should have a field \code{name}
+Each object of class \code{trans} (or \code{transform})
+should have a field \code{name}
 which can be returned by the present function.
 
 The function examines the field \code{transform}.

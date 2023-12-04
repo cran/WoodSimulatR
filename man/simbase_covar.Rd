@@ -23,6 +23,7 @@ which should be included in the simulation. If missing, all numeric
 variables in \code{data} are used.}
 
 \item{transforms}{A named list of objects of class \code{trans}
+or class \code{transform}
 (see function \code{trans_new} in package \code{scales});
 the name of each list entry
 \bold{must} correspond to a variable name in \code{variables}.}
@@ -79,7 +80,7 @@ dataset <- simulate_dataset();
 # calculate a simbase without transforms
 simbase_covar(dataset, c('f', 'E', 'rho', 'E_dyn'));
 
-# calcuate a simbase with log-transformed f
+# calculate a simbase with log-transformed f
 simbase_covar(dataset, c('f', 'E', 'rho', 'E_dyn'), list(f = scales::log_trans()));
 
 # if we group the dataset, we get a simbase_list object

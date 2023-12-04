@@ -109,6 +109,7 @@
 #'
 #' @export
 get_subsample_definitions <- function(country=NULL, loadtype='t', species='PCAB') {
+  share <- subsample <- NULL; # due to NSE notes in R CMD check
 
   # extract data for the loadtype
   stopifnot(loadtype %in% c('be', 't'));
@@ -179,7 +180,7 @@ get_subsample_definitions <- function(country=NULL, loadtype='t', species='PCAB'
     # one country (see Sweden for loadtype bending)
     gdps <- dplyr::left_join(
       tibble::tibble(subsample = names(country), share=country),
-      dplyr::select(gdps, -.data$share),
+      dplyr::select(gdps, -share),
       by='subsample')
 
     # simulating data for missing subsample names
@@ -205,10 +206,10 @@ get_subsample_definitions <- function(country=NULL, loadtype='t', species='PCAB'
     # the second appearance of the name gets changed to '*_1'.
     gdps$subsample[!i] <- gdps$country[!i];
 
-    dups <- dplyr::summarise(dplyr::group_by(gdps, .data$subsample), n=dplyr::n());
-    nums <- dplyr::mutate(dplyr::group_by(gdps, .data$subsample), i=1, i=cumsum(i));
-    nums <- dplyr::left_join(dplyr::select(nums, .data$subsample, i), dups, by='subsample');
-    nums <- dplyr::mutate(nums, s2 = ifelse(n==1, .data$subsample, paste0(.data$subsample, '_', i)));
+    dups <- dplyr::summarise(dplyr::group_by(gdps, subsample), n=dplyr::n());
+    nums <- dplyr::mutate(dplyr::group_by(gdps, subsample), i=1, i=cumsum(i));
+    nums <- dplyr::left_join(dplyr::select(nums, subsample, i), dups, by='subsample');
+    nums <- dplyr::mutate(nums, s2 = ifelse(n==1, subsample, paste0(subsample, '_', i)));
     gdps$subsample <- nums$s2;
     gdps$project <- NULL;
   }

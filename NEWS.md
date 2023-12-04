@@ -1,3 +1,22 @@
+# WoodSimulatR 0.6.1
+
+* `simbase_covar()` allows the use of transformations, for which it relies on
+  the package `scales`.
+  It verifies that the transformation are of class `trans`.
+  In version 1.3.0 of `scales`, the class name of transformation was renamed
+  from `trans` to `transform`.
+    + As an intermediate solution, both class names `trans` and `transform` are
+      now allowed.
+    + The `simbase` objects stored in `WoodSimulatR` were updated to the new
+      class name `transform`.
+* Removed the `.data` pronoun, because it is deprecated in `tidyselect`
+  expressions since `tidyselect` version 1.2.0.
+  As an alternative way to remove the NOTE about "undefined global variables"
+  which are actually due to non-standard evaluation, the variables in question
+  are set to `NULL` at the beginning of each involved function, as recommended
+  by the vignette "Importing data.table" from the `data.table` package.
+* Corrected a typo in the help for `simbase_covar()`
+
 # WoodSimulatR 0.6.0
 
 * Major overhaul of `simulate_dataset()`:
