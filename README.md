@@ -4,7 +4,6 @@
 # WoodSimulatR
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 The `WoodSimulatR` package has been developed in the project InnoGrading
@@ -50,9 +49,11 @@ Turk (2010).
 
 <!-- code for rendering README.Rmd: rmarkdown::render('README.Rmd') -->
 
-<div id="refs" class="references">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
 
-<div id="ref-RantaMaunus_2010_dynamic_settings_simulation">
+<div id="ref-RantaMaunus_2010_dynamic_settings_simulation"
+class="csl-entry">
 
 Ranta-Maunus, Alpo, and Goran Turk. 2010. “Approach of Dynamic
 Production Settings for Machine Strength Grading.” In *11th World

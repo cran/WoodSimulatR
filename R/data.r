@@ -18,7 +18,7 @@
 #'    training and test samples
 #'  \item transformation -- empty for no transformation, "logf" if the strength
 #'    has been log-transformed prior to calculation of the simbase -- see also
-#'    the argument \code{transforms} in \code{\link{simbase_covar}}.
+#'    the argument \code{transforms} in [simbase_covar()].
 #' }
 #'
 #' The simbases contain the basis for simulating the following variables:
@@ -67,7 +67,7 @@ NULL
 #'
 #' @details
 #' For simulation of an entire dataset with different subsamples with different
-#' characteristics (see \code{\link{simulate_dataset}}),
+#' characteristics (see [simulate_dataset()]),
 #' it may be useful to be able to refer to existing results
 #' from literature as a basis.
 #'

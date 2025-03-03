@@ -25,6 +25,6 @@ different simulations. This function tries to simplify the label generation.
 }
 \details{
 Primarily, this function is intended to be called as a default from
-\code{\link{simbase_covar}}. It can also serve as a template for creating
+\code{\link[=simbase_covar]{simbase_covar()}}. It can also serve as a template for creating
 custom labelling functions.
 }

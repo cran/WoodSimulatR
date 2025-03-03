@@ -1,3 +1,12 @@
+# WoodSimulatR 0.6.2
+
+* Update the links in the documentation, especially those which link to
+  functions in other packages, so that `roxygen2` automatically creates the
+  correct links.
+  This is relevant for functions which are documented under topics which differ
+  from the function name.
+  At the moment, however, this is mostly a cosmetic update.
+
 # WoodSimulatR 0.6.1
 
 * `simbase_covar()` allows the use of transformations, for which it relies on

@@ -7,10 +7,10 @@
 simbase_list(data, simbase_constructor, ..., suffix = "_lst")
 }
 \arguments{
-\item{data}{A grouped dataset (see \code{\link{group_by}})}
+\item{data}{A grouped dataset (see \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
 \item{simbase_constructor}{A function which returns a \code{simbase_*}
-object, like \code{\link{simbase_covar}}}
+object, like \code{\link[=simbase_covar]{simbase_covar()}}}
 
 \item{\dots}{Further arguments passed to the \code{simbase_*} function.}
 
@@ -19,23 +19,23 @@ all the same (see details).}
 }
 \value{
 A \code{simbase_list} object; this is essentially a
-\code{\link{tibble}} with the grouping columns of \code{data} and a column
+\link[tibble:tibble]{tibble::tibble} with the grouping columns of \code{data} and a column
 \code{.simbase} which contains the \code{simbase_*} objects.
 }
 \description{
 If a function of the \code{simbase_*} family encounters grouped \code{data}
-(as caused by \code{\link{group_by}}), it should invoke \code{simbase_list}
+(as caused by \code{\link[dplyr:group_by]{dplyr::group_by()}}), it should invoke \code{simbase_list}
 to create a collection of separate simbases for each group.
 }
 \section{Technical details}{
 
 Currently, the "\code{simbase_*} family" only consists of
-\code{\link{simbase_covar}} (although, in a broader sense,
+\code{\link[=simbase_covar]{simbase_covar()}} (although, in a broader sense,
 \code{simbase_list} can also be thought to be part of this "family").
 It is planned to add further simulation types in a later release.
 
 The functions of the \code{simbase_*} family support label
-generation (see e.g. \code{\link{simbase_covar}}). These functions should
+generation (see e.g. \code{\link[=simbase_covar]{simbase_covar()}}). These functions should
 generate the label \emph{before} invoking \code{simbase_list}, so that there
 is a common label for all of the simbases; \code{simbase_list} adds a suffix
 \code{suffix}. A warning is issued if the labels of the different simbases

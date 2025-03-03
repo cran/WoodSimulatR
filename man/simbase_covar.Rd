@@ -14,9 +14,9 @@ simbase_covar(
 }
 \arguments{
 \item{data}{The dataset for the calculation of the reference data for
-simulation; for grouped datasets (see \code{\link{group_by}}),
+simulation; for grouped datasets (see \code{\link[dplyr:group_by]{dplyr::group_by()}}),
 the reference data is
-calculated for each group separately (see also \code{\link{simbase_list}}).}
+calculated for each group separately (see also \code{\link[=simbase_list]{simbase_list()}}).}
 
 \item{variables}{Character vector containing the names in \code{data}
 which should be included in the simulation. If missing, all numeric
@@ -34,7 +34,7 @@ the data, a string giving the class
 of the simbase object (here \code{"simbase_covar"}) and the
 transforms list.}
 
-\item{...}{Arguments to be passed on to \code{\link{simbase_list}}
+\item{...}{Arguments to be passed on to \code{\link[=simbase_list]{simbase_list()}}
 (\emph{if} it is called).}
 }
 \value{
@@ -69,9 +69,9 @@ then the returned object also has a field \code{loadtype} with that value.
 One can also calculate a simbase under the assumption that the correlations
 are different for different subgroups of the data. This is done by grouping
 the dataset \code{data} prior to passing it to the function,
-using \code{\link{group_by}}. In this case, several objects of
-class \code{simbase_covar} are created and joined together in a \code{\link{tibble}} --
-see also \code{\link{simbase_list}}.
+using \code{\link[dplyr:group_by]{dplyr::group_by()}}. In this case, several objects of
+class \code{simbase_covar} are created and joined together in a \link[tibble:tibble]{tibble::tibble} --
+see also \code{\link[=simbase_list]{simbase_list()}}.
 }
 \examples{
 # obtain a dataset for demonstration

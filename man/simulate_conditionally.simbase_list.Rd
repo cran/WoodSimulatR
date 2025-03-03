@@ -36,7 +36,7 @@ Add simulated values to a dataset conditionally, based on a \code{simbase_list} 
 \details{
 Simulating values based on a \code{\link{simbase_list}} object
 has some special aspects compared to that of other \code{simbase_*} objects,
-(see \code{\link{simulate_conditionally}}).
+(see \code{\link[=simulate_conditionally]{simulate_conditionally()}}).
 
 In particular, a \code{\link{simbase_list}} object stores \code{simbase}s
 for specific value combinations within the grouping variables.
@@ -48,8 +48,8 @@ dedicated \code{simbase} object exists, this will lead to \code{NA} values
 in the columns to be simulated and either to an error
 (if \code{error_when_groups_missing = TRUE}) or to a warning.
 
-Due to the internal call to \code{\link{nest}} and subsequent call to
-\code{\link{unnest}}, the returned dataset will be ordered according to
+Due to the internal call to \code{\link[tidyr:nest]{tidyr::nest()}} and subsequent call to
+\code{\link[tidyr:unnest]{tidyr::unnest()}}, the returned dataset will be ordered according to
 the grouping variables in the simbase, with any grouping variable
 combinations missing in the simbase coming last.
 }

@@ -12,7 +12,7 @@ The dataset has to contain at least one variable which is also included in
 the \code{simbase_*} object.}
 
 \item{simbase}{Basic data object for the simulation, as calculated e.g.
-by \code{\link{simbase_covar}} or \code{\link{simbase_list}}.}
+by \code{\link[=simbase_covar]{simbase_covar()}} or \code{\link[=simbase_list]{simbase_list()}}.}
 
 \item{force_positive}{If \code{TRUE}, the resulting values are forced
 to be \eqn{\ge 0}.}

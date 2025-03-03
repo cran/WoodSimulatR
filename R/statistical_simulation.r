@@ -1,31 +1,31 @@
 #' Wrapper for the \code{simbase_*} functions for grouped data
 #'
 #' If a function of the \code{simbase_*} family encounters grouped \code{data}
-#' (as caused by \code{\link{group_by}}), it should invoke \code{simbase_list}
+#' (as caused by [dplyr::group_by()]), it should invoke \code{simbase_list}
 #' to create a collection of separate simbases for each group.
 #'
 #' @section Technical details:
 #' Currently, the "\code{simbase_*} family" only consists of
-#' \code{\link{simbase_covar}} (although, in a broader sense,
+#' [simbase_covar()] (although, in a broader sense,
 #' \code{simbase_list} can also be thought to be part of this "family").
 #' It is planned to add further simulation types in a later release.
 #'
 #' The functions of the \code{simbase_*} family support label
-#' generation (see e.g. \code{\link{simbase_covar}}). These functions should
+#' generation (see e.g. [simbase_covar()]). These functions should
 #' generate the label \emph{before} invoking \code{simbase_list}, so that there
 #' is a common label for all of the simbases; \code{simbase_list} adds a suffix
 #' \code{suffix}. A warning is issued if the labels of the different simbases
 #' are not all equal; no suffix is added in this case.
 #'
-#' @param data A grouped dataset (see \code{\link{group_by}})
+#' @param data A grouped dataset (see [dplyr::group_by()])
 #' @param simbase_constructor A function which returns a \code{simbase_*}
-#'  object, like \code{\link{simbase_covar}}
+#'  object, like [simbase_covar()]
 #' @param \dots Further arguments passed to the \code{simbase_*} function.
 #' @param suffix Suffix to be added to the individual simbase labels if they are
 #'  all the same (see details).
 #'
 #' @return A \code{simbase_list} object; this is essentially a
-#'  \code{\link{tibble}} with the grouping columns of \code{data} and a column
+#'  [tibble::tibble] with the grouping columns of \code{data} and a column
 #'  \code{.simbase} which contains the \code{simbase_*} objects.
 #'
 #' @importFrom dplyr group_nest
@@ -108,14 +108,14 @@ simbase_list <- function(data, simbase_constructor, ..., suffix = '_lst') {
 #' One can also calculate a simbase under the assumption that the correlations
 #' are different for different subgroups of the data. This is done by grouping
 #' the dataset `data` prior to passing it to the function,
-#' using \code{\link{group_by}}. In this case, several objects of
-#' class `simbase_covar` are created and joined together in a \code{\link{tibble}} --
-#' see also \code{\link{simbase_list}}.
+#' using [dplyr::group_by()]. In this case, several objects of
+#' class `simbase_covar` are created and joined together in a [tibble::tibble] --
+#' see also [simbase_list()].
 #'
 #' @param data The dataset for the calculation of the reference data for
-#'  simulation; for grouped datasets (see \code{\link{group_by}}),
+#'  simulation; for grouped datasets (see [dplyr::group_by()]),
 #'  the reference data is
-#'  calculated for each group separately (see also \code{\link{simbase_list}}).
+#'  calculated for each group separately (see also [simbase_list()]).
 #' @param variables Character vector containing the names in \code{data}
 #'   which should be included in the simulation. If missing, all numeric
 #'   variables in \code{data} are used.
@@ -129,7 +129,7 @@ simbase_list <- function(data, simbase_constructor, ..., suffix = '_lst') {
 #'    the data, a string giving the class
 #'    of the simbase object (here \code{"simbase_covar"}) and the
 #'    transforms list.
-#' @param ... Arguments to be passed on to \code{\link{simbase_list}}
+#' @param ... Arguments to be passed on to [simbase_list()]
 #'  (\emph{if} it is called).
 #'
 #' @return An \code{S3} object of class `simbase_list` if `data` is grouped,
@@ -252,7 +252,7 @@ simbase_covar <- function(data, variables = NULL, transforms=list(), label = sim
 #' different simulations. This function tries to simplify the label generation.
 #'
 #' Primarily, this function is intended to be called as a default from
-#' \code{\link{simbase_covar}}. It can also serve as a template for creating
+#' [simbase_covar()]. It can also serve as a template for creating
 #' custom labelling functions.
 #'
 #' @param data The dataset for the calculation of the basic simulation data.
@@ -298,10 +298,10 @@ simbase_labeler <- function(data, simbase_class, transforms) {
 
 #' Return labels for given transforms
 #'
-#' The function \code{\link{simbase_covar}} allows the specification of a
+#' The function [simbase_covar()] allows the specification of a
 #' transform for one or more variables. The present function creates short
 #' names for such transforms for use in labelling (by default, the labelling is
-#' done by \code{\link{simbase_labeler}}).
+#' done by [simbase_labeler()]).
 #'
 #' The label of a transform could be the value of the field \code{name} from
 #' each object of class \code{trans} (or \code{transform}),
@@ -313,7 +313,7 @@ simbase_labeler <- function(data, simbase_class, transforms) {
 #' which can be returned by the present function.
 #'
 #' The function examines the field \code{transform}.
-#' If this field contains a primitive function (see \code{\link{is_primitive}}),
+#' If this field contains a primitive function (see [rlang::is_primitive()]),
 #' or if there is just one function call in the body of this \code{transform}
 #' function, we can also return the name of this called function.
 #'
@@ -395,7 +395,7 @@ get_transform_names <- function(transforms, prefer_primitive = c('if_shorter', '
 #'  The dataset has to contain at least one variable which is also included in
 #'  the \code{simbase_*} object.
 #' @param simbase Basic data object for the simulation, as calculated e.g.
-#'   by \code{\link{simbase_covar}} or \code{\link{simbase_list}}.
+#'   by [simbase_covar()] or [simbase_list()].
 #' @param force_positive If \code{TRUE}, the resulting values are forced
 #'   to be \eqn{\ge 0}.
 #' @param ... further arguments passed to or from other methods.
@@ -516,7 +516,7 @@ simulate_conditionally.simbase_covar <- function(data, simbase, force_positive=T
 #'
 #' @details Simulating values based on a \code{\link{simbase_list}} object
 #' has some special aspects compared to that of other \code{simbase_*} objects,
-#' (see \code{\link{simulate_conditionally}}).
+#' (see [simulate_conditionally()]).
 #'
 #' In particular, a \code{\link{simbase_list}} object stores \code{simbase}s
 #' for specific value combinations within the grouping variables.
@@ -528,8 +528,8 @@ simulate_conditionally.simbase_covar <- function(data, simbase, force_positive=T
 #' in the columns to be simulated and either to an error
 #' (if \code{error_when_groups_missing = TRUE}) or to a warning.
 #'
-#' Due to the internal call to \code{\link{nest}} and subsequent call to
-#' \code{\link{unnest}}, the returned dataset will be ordered according to
+#' Due to the internal call to [tidyr::nest()] and subsequent call to
+#' [tidyr::unnest()], the returned dataset will be ordered according to
 #' the grouping variables in the simbase, with any grouping variable
 #' combinations missing in the simbase coming last.
 #'

@@ -50,7 +50,7 @@ Means and standard deviations of grade determining properties (GDPs) from litera
 }
 \details{
 For simulation of an entire dataset with different subsamples with different
-characteristics (see \code{\link{simulate_dataset}}),
+characteristics (see \code{\link[=simulate_dataset]{simulate_dataset()}}),
 it may be useful to be able to refer to existing results
 from literature as a basis.
 

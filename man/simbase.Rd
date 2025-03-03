@@ -34,7 +34,7 @@ testing. The latter two can be used to more closely simulate independent
 training and test samples
 \item transformation -- empty for no transformation, "logf" if the strength
 has been log-transformed prior to calculation of the simbase -- see also
-the argument \code{transforms} in \code{\link{simbase_covar}}.
+the argument \code{transforms} in \code{\link[=simbase_covar]{simbase_covar()}}.
 }
 
 The simbases contain the basis for simulating the following variables:

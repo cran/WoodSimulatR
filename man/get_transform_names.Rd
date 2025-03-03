@@ -25,10 +25,10 @@ be retrieved.}
 A named vector of transforms names.
 }
 \description{
-The function \code{\link{simbase_covar}} allows the specification of a
+The function \code{\link[=simbase_covar]{simbase_covar()}} allows the specification of a
 transform for one or more variables. The present function creates short
 names for such transforms for use in labelling (by default, the labelling is
-done by \code{\link{simbase_labeler}}).
+done by \code{\link[=simbase_labeler]{simbase_labeler()}}).
 }
 \details{
 The label of a transform could be the value of the field \code{name} from
@@ -41,7 +41,7 @@ should have a field \code{name}
 which can be returned by the present function.
 
 The function examines the field \code{transform}.
-If this field contains a primitive function (see \code{\link{is_primitive}}),
+If this field contains a primitive function (see \code{\link[rlang:is_function]{rlang::is_primitive()}}),
 or if there is just one function call in the body of this \code{transform}
 function, we can also return the name of this called function.
 

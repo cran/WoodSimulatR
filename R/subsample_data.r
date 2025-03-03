@@ -3,13 +3,13 @@
 #' In the \code{WoodSimulatR} package, means and standard deviations of grade
 #' determining properties (GDPs) for a number of Norway spruce
 #' (\emph{Picea abies}) samples from literature are stored for use in
-#' \code{\link{simulate_dataset}}. They are indexed by a two-letter country code
+#' [simulate_dataset()]. They are indexed by a two-letter country code
 #' (and a suffixed number if disambiguation is required).
 #'
 #' The direct descriptive data can also be directly accessed
 #' (\code{\link{gdp_data}}).
 #' The present function is meant to prepare the data
-#' as input to the \code{subsets} argument of \code{\link{simulate_dataset}}.
+#' as input to the \code{subsets} argument of [simulate_dataset()].
 #' It allows picking multiple samples from the same country (disambiguating by
 #' creating appropriately named entries in the column \code{subsample}) and
 #' creating random sample data (uniformly distributed within the
@@ -21,7 +21,7 @@
 #' the number of pieces in the original sample. Unless relative subsample sizes
 #' are explicitly asked for by providing a named numeric vector for the
 #' argument \code{country}, the present function always resets \code{share} to
-#' 1, prompting \code{\link{simulate_dataset}} to create
+#' 1, prompting [simulate_dataset()] to create
 #' (approximately) equal-sized subsamples.
 #'
 #' The GDPs depend on the type of destructive testing done

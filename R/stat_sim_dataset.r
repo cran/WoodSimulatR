@@ -17,7 +17,7 @@
 #'    means and standard deviations if \code{simbase} is an object of class
 #'    \code{\link{simbase_list}}.
 #'  \item If a numeric vector or a character vector, it is used as argument
-#'    \code{country} in an internal call to \code{\link{get_subsample_definitions}}.
+#'    \code{country} in an internal call to [get_subsample_definitions()].
 #'  \item If a dataset, there are the following requirements:
 #'    \itemize{
 #'      \item \emph{identifier columns}: The dataset has to have one or more
@@ -25,7 +25,7 @@
 #'        factors) which uniquely identify each row.
 #'        These \emph{identifier columns} are named \code{"country"} and
 #'        \code{"subsample"} in the standard case as yielded by
-#'        \code{\link{get_subsample_definitions}}.
+#'        [get_subsample_definitions()].
 #'        In the general case, the identifier columns are detected as those
 #'        columns which are not named \code{share, species, loadtype} or
 #'        \code{literature} and which do not end in \code{_mean} or \code{_sd}.
@@ -57,18 +57,18 @@
 #'        the \emph{identifier columns} are "country" and "subsample".
 #'      \item The value combinations in the \emph{identifier columns} have to
 #'        match those which the \code{subsets} argument leads to
-#'        (see also \code{\link{get_subsample_definitions}}).
+#'        (see also [get_subsample_definitions()]).
 #'    }
 #' }
 #'
 #' Both the means and standard deviations in the subsample definitions
-#' (see \code{\link{get_subsample_definitions}}) as well as the values in the
+#' (see [get_subsample_definitions()]) as well as the values in the
 #' `simbase` depend on the way the destructive testing of the sawn timber was
 #' done. If the `simbase` has a field `loadtype`
-#' (see also \code{\link{simbase_covar}}), this value is used in the call to
-#' \code{\link{get_subsample_definitions}}. Otherwise, the `loadtype` has to be
+#' (see also [simbase_covar()]), this value is used in the call to
+#' [get_subsample_definitions()]. Otherwise, the `loadtype` has to be
 #' passed directly to the present function unless no call to
-#' \code{\link{get_subsample_definitions}} is necessary (this depends on the
+#' [get_subsample_definitions()] is necessary (this depends on the
 #' value of `subsets` -- see above). If a loadtype has been defined, a variable
 #' `loadtype` is also created in the resulting dataset for reference.
 #'
@@ -76,9 +76,9 @@
 #' zero.
 #'
 #' If \code{random_seed} is not \code{NULL}, reproducibility of results
-#' is enforced by using \code{\link{set.seed}} with arguments
+#' is enforced by using [set.seed()] with arguments
 #' \code{kind='Mersenne-Twister'} and \code{normal.kind='Inversion'},
-#' and by calling \code{\link{RNGversion}} with argument \code{RNGversion}.
+#' and by calling [RNGversion()] with argument \code{RNGversion}.
 #'
 #' If \code{random_seed} is not \code{NULL}, the random number generator
 #' is reset at the end of the function using \code{set.seed(NULL)} and
@@ -88,28 +88,23 @@
 #' @param subsets Either \code{NULL},
 #'  or a \code{data.frame} describing the subsets (see
 #'  details) or a character vector or named numeric vector suitable for
-#'  argument \code{country} in \code{\link{get_subsample_definitions}}.
-# @param variables A string vector of variables to return. Allowed values are
-#   \code{'f', 'E', 'rho', 'ip_edyn_u', 'ip_f', 'ip_edyn', 'ip_rho'}. \cr
-#   If an entry of the string vector is named, the respective variable is
-#   renamed to that value (similar to \code{\link{rename}}). \cr
-#   \bold{Not yet implemented!}
+#'  argument \code{country} in [get_subsample_definitions()].
 #' @param random_seed Allows to set an integer seed value for the random number
 #'  generator to achieve reproducible results
-#'  (see also \code{\link{set.seed}}).
+#'  (see also [set.seed()]).
 #' @param simbase An object of class \code{\link{simbase_covar}} or
 #'  \code{\link{simbase_list}}. In particular, one of the simbases stored in
 #'  \code{WoodSimulatR} may be used -- see \code{\link{simbase}}.
-#' @param loadtype For passing on to \code{\link{get_subsample_definitions}}.
+#' @param loadtype For passing on to [get_subsample_definitions()].
 #'  A string with either "t" (for material tested in tension) or "be" (for
 #'  material tested in edgewise bending). Is only used if the simbase doesn't
 #'  contain a field \code{loadtype} or if the loadtype is ambiguous or not
 #'  equal to "t" or "be".
-#' @param ... arguments passed on to \code{\link{get_subsample_definitions}}.
+#' @param ... arguments passed on to [get_subsample_definitions()].
 #' @param RNGversion In \code{WoodSimulatR 0.5}, the \code{RNGversion} had been
 #'  fixed to \code{RNGversion = "3.5.0"}, but this setting now causes a warning
 #'  because the random number generator was changed in R version 3.6.0
-#'  (see \code{\link{RNGversion}}).
+#'  (see [RNGversion()]).
 #'  For perfect reproducibility of results from \code{WoodSimulatR 0.5},
 #'  one should set \code{RNGversion = "3.5.0"}.
 #'
